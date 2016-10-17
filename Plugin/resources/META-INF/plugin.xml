@@ -1,17 +1,15 @@
 <idea-plugin version="2">
-    <id>com.your.company.unique.plugin.id</id>
-    <name>Plugin display name here</name>
-    <version>1.0</version>
-    <vendor email="support@yourcompany.com" url="http://www.yourcompany.com">YourCompany</vendor>
+    <id>com.madrapps.issuetracker.plugin</id>
+    <name>Issue Tracker</name>
+    <version>0.1</version>
+    <vendor email="madrasappfactory@gmail.com" url="http://madrapps.github.io">Madrapps</vendor>
 
     <description><![CDATA[
       Enter short description for your plugin here.<br>
-      <em>most HTML tags may be used</em>
     ]]></description>
 
     <change-notes><![CDATA[
-      Add change notes here.<br>
-      <em>most HTML tags may be used</em>
+      Initial Commit<br>
     ]]>
     </change-notes>
 
@@ -23,13 +21,17 @@
     <!-- uncomment to enable plugin in all products
     <depends>com.intellij.modules.lang</depends>
     -->
-
+    <depends>com.intellij.tasks</depends>
     <extensions defaultExtensionNs="com.intellij">
         <!-- Add your extensions here -->
     </extensions>
 
     <actions>
         <!-- Add your actions here -->
+        <action id="CheckTask" class="com.madrapps.issuetracker.actions.CheckTask" text="CheckTask"
+                description="Check the task, sample only">
+            <add-to-group group-id="HelpMenu" anchor="last"/>
+            <keyboard-shortcut keymap="$default" first-keystroke="shift ctrl B"/>
+        </action>
     </actions>
-
 </idea-plugin>
