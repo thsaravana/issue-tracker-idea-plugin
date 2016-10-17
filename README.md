@@ -1,2 +1,2 @@
 # issue-tracker-idea-plugin
-Plugin for Android Studio that integrates 'Tasks' and 'Github/Bitbucket/... Issues'
+Plugin for IntelliJ iDEA to list all the Issues logged in Version Control (Github/Bitbucket/...) and get info on any selected issue.
