@@ -39,6 +39,10 @@ public class CheckTask extends AnAction {
                     System.out.println(issue.getSummary());
                     System.out.println(issue.getType());
                     System.out.println(issue.getRepository());
+                    System.out.println(issue.getIcon());
+                    System.out.println(issue.getState());
+                    System.out.println(issue.isIssue());
+                    System.out.println(issue.isClosed());
                 }
             } else {
                 System.out.println("TaskManager is NULL");
