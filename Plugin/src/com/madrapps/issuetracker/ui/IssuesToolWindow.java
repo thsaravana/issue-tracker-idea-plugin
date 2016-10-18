@@ -15,19 +15,26 @@ import com.intellij.ui.table.TableView;
 import com.intellij.util.text.DateFormatUtil;
 import com.intellij.util.ui.ColumnInfo;
 import com.intellij.util.ui.ListTableModel;
+
 import org.commonmark.node.Node;
 import org.commonmark.parser.Parser;
 import org.commonmark.renderer.html.HtmlRenderer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import javax.swing.*;
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
+import javax.swing.Icon;
+import javax.swing.JPanel;
+import javax.swing.JTable;
+import javax.swing.JTextPane;
+import javax.swing.ListSelectionModel;
+
 /**
+ * This is the Tool Window of the Issue Tracker plugin. The GUI is backed up be a .form file.
+ * <p>
  * Created by Henry on 10/17/2016.
  */
 public class IssuesToolWindow implements ToolWindowFactory {
@@ -61,15 +68,17 @@ public class IssuesToolWindow implements ToolWindowFactory {
 
         @Override
         public Class<?> getColumnClass() {
+            // So that the appropriate Renderer is used to render and Icon
             return Icon.class;
         }
 
         @Override
         public int getWidth(JTable table) {
+            // So as to prevent users from resizing this column
             return 50;
         }
     };
-    private final static ColumnInfo<Task, String> CREATED_AT = new ColumnInfo<Task, String>("Created On") {
+    private final static ColumnInfo<Task, String> CREATED_ON = new ColumnInfo<Task, String>("Created On") {
         public String valueOf(Task object) {
             return getValueOfDate(object.getCreated());
         }
@@ -87,22 +96,18 @@ public class IssuesToolWindow implements ToolWindowFactory {
             return (o, o1) -> Comparing.compare(o.getUpdated(), o1.getUpdated());
         }
     };
+    /** The columns of the issues table */
+    private static final ColumnInfo[] COLUMN_NAMES = {ICON, PRESENTABLE_NAME, CREATED_ON, LAST_UPDATED};
+    /** To parse the Markdown text */
     private static final Parser MARKDOWN_PARSER = Parser.builder().build();
+    /** To render the markdown as html */
     private static final HtmlRenderer MARKDOWN_RENDERER = HtmlRenderer.builder().build();
+    /** The root component that holds every component */
     private JPanel mContentPanel;
+    /** The table that shows the list of tasks/issues */
     private TableView<Task> mIssuesTable;
+    /** The summary panel that shows the details of an issue when it's selected from the table */
     private JTextPane mIssueSummaryTextPane;
-
-    @NotNull
-    private static String getValueOfDate(@Nullable Date date) {
-        String formattedDate;
-        if (date != null) {
-            formattedDate = DateFormatUtil.formatPrettyDateTime(date);
-        } else {
-            formattedDate = "---";
-        }
-        return formattedDate;
-    }
 
     @Override
     public void createToolWindowContent(@NotNull Project project, @NotNull ToolWindow toolWindow) {
@@ -112,36 +117,54 @@ public class IssuesToolWindow implements ToolWindowFactory {
         final Content content = ContentFactory.SERVICE.getInstance().createContent(panel, "", false);
         toolWindow.getContentManager().addContent(content);
         panel.setContent(mContentPanel);
-        initUI(project);
-    }
 
-    private void initUI(Project project) {
-        final ColumnInfo[] columnsNames = {ICON, PRESENTABLE_NAME, CREATED_AT, LAST_UPDATED};
-        List<Task> items = new ArrayList<>();
+        initializeComponents();
 
-        if (project != null) {
-            final TaskManager taskManager = project.getComponent(TaskManager.class);
-            if (taskManager != null) {
-                List<Task> issues = taskManager.getIssues(null);
-                for (Task issue : issues) {
-                    items.add(issue);
-                }
+        final TaskManager taskManager = project.getComponent(TaskManager.class);
+        if (taskManager != null) {
+            final List<Task> issuesList = taskManager.getIssues(null);
+            if (issuesList != null) {
+                updateIssueList(issuesList);
             }
         }
+    }
 
-        mIssuesTable.setModelAndUpdateColumns(new ListTableModel<>(columnsNames, items, 0));
+    /**
+     * Get a neat readable format of the date if it's not null, or an empty string
+     *
+     * @param date the date
+     * @return the date in a readable string format
+     */
+    @NotNull
+    private static String getValueOfDate(@Nullable Date date) {
+        String formattedDate = "";
+        if (date != null) {
+            formattedDate = DateFormatUtil.formatPrettyDateTime(date);
+        }
+        return formattedDate;
+    }
+
+    public void updateIssueList(@NotNull List<Task> issuesList) {
+        mIssuesTable.setModelAndUpdateColumns(new ListTableModel<>(COLUMN_NAMES, issuesList, 0));
+        showSummary();
+    }
+
+    /**
+     * Initializes, configures, set listeners for the Components
+     */
+    private void initializeComponents() {
         mIssuesTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         mIssuesTable.setRowSelectionAllowed(true);
         mIssuesTable.getSelectionModel().setSelectionInterval(0, 0);
-        showSummary();
-        mIssuesTable.getSelectionModel().addListSelectionListener(e -> {
-            showSummary();
-        });
+        mIssuesTable.getSelectionModel().addListSelectionListener(e -> showSummary());
         mIssueSummaryTextPane.addHyperlinkListener(new BrowserHyperlinkListener());
     }
 
+    /**
+     * Show the summary for the selected issue in the summary panel
+     */
     private void showSummary() {
-        Task selectedIssue = mIssuesTable.getSelectedObject();
+        final Task selectedIssue = mIssuesTable.getSelectedObject();
         if (selectedIssue != null) {
             final StringBuilder stringBuilder = new StringBuilder();
             stringBuilder.append("<style>")
@@ -156,7 +179,9 @@ public class IssuesToolWindow implements ToolWindowFactory {
                 stringBuilder.append("<div class=\"comment\">")
                         .append("<div class=\"comment_author_date\"><strong>")
                         .append(comment.getAuthor()).append("&nbsp;")
-                        .append(getHtmlDate(comment))
+                        .append("(")
+                        .append(getValueOfDate(comment.getDate()))
+                        .append(")")
                         .append("</strong></div>")
                         .append(fromMarkDownToHtml(comment.getText()))
                         .append("</div><br/>");
@@ -165,18 +190,18 @@ public class IssuesToolWindow implements ToolWindowFactory {
         }
     }
 
-    private String fromMarkDownToHtml(String markdown) {
-        final Node document = MARKDOWN_PARSER.parse(markdown);
-        return MARKDOWN_RENDERER.render(document);
-    }
-
-    @NotNull
-    private String getHtmlDate(Comment comment) {
-        String formattedDate = "";
-        final Date date = comment.getDate();
-        if (date != null) {
-            formattedDate = "(" + DateFormatUtil.formatPrettyDateTime(date) + ")";
+    /**
+     * Converts from markdown format to html format, or simply returns empty string if null
+     *
+     * @param markdown the text in markdown, non markdown format or simply null
+     * @return an html string or an empty string based on the input
+     */
+    private String fromMarkDownToHtml(@Nullable String markdown) {
+        if (markdown != null) {
+            final Node document = MARKDOWN_PARSER.parse(markdown);
+            return MARKDOWN_RENDERER.render(document);
+        } else {
+            return "";
         }
-        return formattedDate;
     }
 }
