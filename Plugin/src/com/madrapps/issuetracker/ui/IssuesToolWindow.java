@@ -8,12 +8,16 @@ import com.intellij.openapi.wm.ToolWindowFactory;
 import com.intellij.tasks.Comment;
 import com.intellij.tasks.Task;
 import com.intellij.tasks.TaskManager;
+import com.intellij.ui.BrowserHyperlinkListener;
 import com.intellij.ui.content.Content;
 import com.intellij.ui.content.ContentFactory;
 import com.intellij.ui.table.TableView;
 import com.intellij.util.text.DateFormatUtil;
 import com.intellij.util.ui.ColumnInfo;
 import com.intellij.util.ui.ListTableModel;
+import org.commonmark.node.Node;
+import org.commonmark.parser.Parser;
+import org.commonmark.renderer.html.HtmlRenderer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -83,6 +87,8 @@ public class IssuesToolWindow implements ToolWindowFactory {
             return (o, o1) -> Comparing.compare(o.getUpdated(), o1.getUpdated());
         }
     };
+    private static final Parser MARKDOWN_PARSER = Parser.builder().build();
+    private static final HtmlRenderer MARKDOWN_RENDERER = HtmlRenderer.builder().build();
     private JPanel mContentPanel;
     private TableView<Task> mIssuesTable;
     private JTextPane mIssueSummaryTextPane;
@@ -131,6 +137,7 @@ public class IssuesToolWindow implements ToolWindowFactory {
         mIssuesTable.getSelectionModel().addListSelectionListener(e -> {
             showSummary();
         });
+        mIssueSummaryTextPane.addHyperlinkListener(new BrowserHyperlinkListener());
     }
 
     private void showSummary() {
@@ -141,21 +148,26 @@ public class IssuesToolWindow implements ToolWindowFactory {
                     .append(".comment {color: #000; background-color: #ddffff; padding: 5px 10px; border-left: 6px solid #ccc; display:inline}")
                     .append("p {padding-left:10px;}")
                     .append("</style>");
-            String description = selectedIssue.getDescription();
-            stringBuilder.append("<p>").append(description).append("</p><br/>");
+            String description = fromMarkDownToHtml(selectedIssue.getDescription());
+            stringBuilder.append(description)
+                    .append("<br/>");
             final Comment[] comments = selectedIssue.getComments();
             for (Comment comment : comments) {
                 stringBuilder.append("<div class=\"comment\">")
                         .append("<div class=\"comment_author_date\"><strong>")
-                        .append(comment.getAuthor()).append(" ")
+                        .append(comment.getAuthor()).append("&nbsp;")
                         .append(getHtmlDate(comment))
                         .append("</strong></div>")
-                        .append(comment.getText())
-                        .append(" ")
+                        .append(fromMarkDownToHtml(comment.getText()))
                         .append("</div><br/>");
             }
             mIssueSummaryTextPane.setText(stringBuilder.toString());
         }
+    }
+
+    private String fromMarkDownToHtml(String markdown) {
+        final Node document = MARKDOWN_PARSER.parse(markdown);
+        return MARKDOWN_RENDERER.render(document);
     }
 
     @NotNull

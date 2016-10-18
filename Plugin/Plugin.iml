@@ -675,5 +675,6 @@
         </SOURCES>
       </library>
     </orderEntry>
+    <orderEntry type="library" exported="" name="commonmark-0.7.1" level="project" />
   </component>
 </module>
