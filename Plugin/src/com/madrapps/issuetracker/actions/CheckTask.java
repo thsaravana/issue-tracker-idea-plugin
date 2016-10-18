@@ -23,6 +23,7 @@ public class CheckTask extends AnAction {
                 List<Task> issues = taskManager.getIssues(null);
                 for (Task issue : issues) {
                     System.out.println(issue.getCreated());
+                    System.out.println(issue.getUpdated());
                     System.out.println(issue.getDescription());
                     System.out.println(issue.getIssueUrl());
                     System.out.println(issue.getPresentableName());
