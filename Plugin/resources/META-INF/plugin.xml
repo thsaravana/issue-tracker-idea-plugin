@@ -23,16 +23,23 @@
     -->
     <depends>com.intellij.tasks</depends>
     <extensions defaultExtensionNs="com.intellij">
-        <toolWindow id="Issue Tracker" anchor="bottom" factoryClass="com.madrapps.issuetracker.ui.IssuesToolWindow"
-                    icon="/icons/issueTrackerToolWindow.png"/>
+        <toolWindow anchor="bottom"
+                    factoryClass="com.madrapps.issuetracker.listissues.IssuesToolWindow"
+                    icon="/icons/issueTrackerToolWindow.png"
+                    id="Issue Tracker"/>
     </extensions>
 
     <actions>
         <!-- Add your actions here -->
-        <action id="CheckTask" class="com.madrapps.issuetracker.actions.CheckTask" text="CheckTask"
-                description="Check the task, sample only">
-            <add-to-group group-id="HelpMenu" anchor="last"/>
-            <keyboard-shortcut keymap="$default" first-keystroke="shift ctrl B"/>
+        <action class="com.madrapps.issuetracker.actions.CheckTask"
+                description="Check the task, sample only" id="CheckTask"
+                text="CheckTask">
+            <add-to-group anchor="last" group-id="HelpMenu"/>
+            <keyboard-shortcut first-keystroke="shift ctrl B" keymap="$default"/>
         </action>
+        <action class="com.madrapps.issuetracker.actions.RefreshIssueListAction"
+                description="Reloads the issues from the task repository"
+                icon="AllIcons.Actions.ForceRefresh"
+                id="IssueTracker.RefreshIssueList" text="Refresh"/>
     </actions>
 </idea-plugin>

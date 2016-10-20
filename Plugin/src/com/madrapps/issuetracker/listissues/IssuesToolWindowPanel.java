@@ -1,13 +1,15 @@
-package com.madrapps.issuetracker.ui;
+package com.madrapps.issuetracker.listissues;
 
-import com.intellij.openapi.project.Project;
+import com.intellij.openapi.actionSystem.ActionManager;
+import com.intellij.openapi.actionSystem.ActionPlaces;
+import com.intellij.openapi.actionSystem.ActionToolbar;
+import com.intellij.openapi.actionSystem.AnAction;
+import com.intellij.openapi.actionSystem.DefaultActionGroup;
 import com.intellij.openapi.ui.SimpleToolWindowPanel;
 import com.intellij.openapi.util.Comparing;
 import com.intellij.openapi.wm.ToolWindow;
-import com.intellij.openapi.wm.ToolWindowFactory;
 import com.intellij.tasks.Comment;
 import com.intellij.tasks.Task;
-import com.intellij.tasks.TaskManager;
 import com.intellij.ui.BrowserHyperlinkListener;
 import com.intellij.ui.content.Content;
 import com.intellij.ui.content.ContentFactory;
@@ -15,6 +17,7 @@ import com.intellij.ui.table.TableView;
 import com.intellij.util.text.DateFormatUtil;
 import com.intellij.util.ui.ColumnInfo;
 import com.intellij.util.ui.ListTableModel;
+import com.madrapps.issuetracker.actions.RefreshIssueListAction;
 
 import org.commonmark.node.Node;
 import org.commonmark.parser.Parser;
@@ -22,6 +25,7 @@ import org.commonmark.renderer.html.HtmlRenderer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
@@ -33,11 +37,12 @@ import javax.swing.JTextPane;
 import javax.swing.ListSelectionModel;
 
 /**
- * This is the Tool Window of the Issue Tracker plugin. The GUI is backed up be a .form file.
+ * This is repsonsible for the ToolWindow GUI. The GUI is backed up be a .form file.
  * <p>
- * Created by Henry on 10/17/2016.
+ * Created by Henry on 10/19/2016.
  */
-public class IssuesToolWindow implements ToolWindowFactory {
+public class IssuesToolWindowPanel extends SimpleToolWindowPanel implements IListIssuesContract.IView {
+
     private final static ColumnInfo<Task, String> PRESENTABLE_NAME = new ColumnInfo<Task, String>("Name") {
         public String valueOf(Task object) {
             return object.getPresentableName();
@@ -108,25 +113,27 @@ public class IssuesToolWindow implements ToolWindowFactory {
     private TableView<Task> mIssuesTable;
     /** The summary panel that shows the details of an issue when it's selected from the table */
     private JTextPane mIssueSummaryTextPane;
+    private JPanel mToolbar;
+    /** The list that's backing up the {@code mIssuesTable} */
+    private List<Task> mIssueList;
+
+
+    IssuesToolWindowPanel(ToolWindow toolWindow) {
+        super(true, false);
+        final Content content = ContentFactory.SERVICE.getInstance().createContent(this, "", false);
+        toolWindow.getContentManager().addContent(content);
+        this.setContent(mContentPanel);
+    }
 
     @Override
-    public void createToolWindowContent(@NotNull Project project, @NotNull ToolWindow toolWindow) {
-        toolWindow.setTitle("Issue Tracker");
-
-        final SimpleToolWindowPanel panel = new SimpleToolWindowPanel(false, true);
-        final Content content = ContentFactory.SERVICE.getInstance().createContent(panel, "", false);
-        toolWindow.getContentManager().addContent(content);
-        panel.setContent(mContentPanel);
-
-        initializeComponents();
-
-        final TaskManager taskManager = project.getComponent(TaskManager.class);
-        if (taskManager != null) {
-            final List<Task> issuesList = taskManager.getIssues(null);
-            if (issuesList != null) {
-                updateIssueList(issuesList);
-            }
+    public void updateIssueList(@NotNull List<Task> issuesList, boolean forceUpdate) {
+        if (forceUpdate) {
+            mIssueList.clear();
         }
+        issuesList.stream().filter(task -> !mIssueList.contains(task)).forEach(task -> mIssueList.add(task));
+        final ListTableModel<Task> model = new ListTableModel<>(COLUMN_NAMES, mIssueList, 0);
+        mIssuesTable.setModelAndUpdateColumns(model);
+        showSummary();
     }
 
     /**
@@ -144,15 +151,28 @@ public class IssuesToolWindow implements ToolWindowFactory {
         return formattedDate;
     }
 
-    public void updateIssueList(@NotNull List<Task> issuesList) {
-        mIssuesTable.setModelAndUpdateColumns(new ListTableModel<>(COLUMN_NAMES, issuesList, 0));
-        showSummary();
+    void init() {
+        initializeComponents();
+        initializeActions();
+    }
+
+    private void initializeActions() {
+        final AnAction refreshAction = ActionManager.getInstance().getAction(RefreshIssueListAction.ACTION_ID);
+
+        final DefaultActionGroup actionGroup = new DefaultActionGroup();
+        actionGroup.add(refreshAction);
+
+        final ActionToolbar actionToolbar = ActionManager.getInstance().createActionToolbar(ActionPlaces.UNKNOWN, actionGroup, false);
+        actionToolbar.setTargetComponent(mToolbar);
+        mToolbar.add(actionToolbar.getComponent());
     }
 
     /**
      * Initializes, configures, set listeners for the Components
      */
     private void initializeComponents() {
+        mIssueList = new ArrayList<>();
+
         mIssuesTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         mIssuesTable.setRowSelectionAllowed(true);
         mIssuesTable.getSelectionModel().setSelectionInterval(0, 0);
