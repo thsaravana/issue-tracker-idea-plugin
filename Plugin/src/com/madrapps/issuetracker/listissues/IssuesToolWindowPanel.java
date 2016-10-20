@@ -5,6 +5,7 @@ import com.intellij.openapi.actionSystem.ActionPlaces;
 import com.intellij.openapi.actionSystem.ActionToolbar;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.DefaultActionGroup;
+import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.SimpleToolWindowPanel;
 import com.intellij.openapi.util.Comparing;
 import com.intellij.openapi.wm.ToolWindow;
@@ -116,6 +117,7 @@ public class IssuesToolWindowPanel extends SimpleToolWindowPanel implements ILis
     private JPanel mToolbar;
     /** The list that's backing up the {@code mIssuesTable} */
     private List<Task> mIssueList;
+    private ListIssuesPresenter mPresenter;
 
 
     IssuesToolWindowPanel(ToolWindow toolWindow) {
@@ -140,7 +142,40 @@ public class IssuesToolWindowPanel extends SimpleToolWindowPanel implements ILis
         });
         final ListTableModel<Task> model = new ListTableModel<>(COLUMN_NAMES, mIssueList, 0);
         mIssuesTable.setModelAndUpdateColumns(model);
-        showSummary();
+    }
+
+    @Override
+    public void init(@NotNull Project project) {
+        initializeComponents();
+        initializeActions();
+
+        mPresenter.pullIssues(project, null);
+    }
+
+    @Override
+    public void showSummary(@Nullable String description, @Nullable Comment[] comments) {
+        final StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("<style>")
+                .append(".comment {color: #000; background-color: #ddffff; padding: 5px 10px; border-left: 6px solid #ccc; display:inline}")
+                .append("p {padding-left:10px;}")
+                .append("</style>");
+        final String formattedDescription = fromMarkDownToHtml(description);
+        stringBuilder.append(formattedDescription)
+                .append("<br/>");
+        if (comments != null) {
+            for (Comment comment : comments) {
+                stringBuilder.append("<div class=\"comment\">")
+                        .append("<div class=\"comment_author_date\"><strong>")
+                        .append(comment.getAuthor()).append("&nbsp;")
+                        .append("(")
+                        .append(getValueOfDate(comment.getDate()))
+                        .append(")")
+                        .append("</strong></div>")
+                        .append(fromMarkDownToHtml(comment.getText()))
+                        .append("</div><br/>");
+            }
+        }
+        mIssueSummaryTextPane.setText(stringBuilder.toString());
     }
 
     /**
@@ -158,11 +193,6 @@ public class IssuesToolWindowPanel extends SimpleToolWindowPanel implements ILis
         return formattedDate;
     }
 
-    void init() {
-        initializeComponents();
-        initializeActions();
-    }
-
     private void initializeActions() {
         final AnAction refreshAction = ActionManager.getInstance().getAction(RefreshIssueListAction.ACTION_ID);
 
@@ -178,43 +208,22 @@ public class IssuesToolWindowPanel extends SimpleToolWindowPanel implements ILis
      * Initializes, configures, set listeners for the Components
      */
     private void initializeComponents() {
+        mPresenter = ListIssuesPresenter.getInstance();
+        mPresenter.setView(this);
+
         mIssueList = new ArrayList<>();
 
         mIssuesTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         mIssuesTable.setRowSelectionAllowed(true);
         mIssuesTable.getSelectionModel().setSelectionInterval(0, 0);
-        mIssuesTable.getSelectionModel().addListSelectionListener(e -> showSummary());
-        mIssueSummaryTextPane.addHyperlinkListener(new BrowserHyperlinkListener());
-    }
-
-    /**
-     * Show the summary for the selected issue in the summary panel
-     */
-    private void showSummary() {
-        final Task selectedIssue = mIssuesTable.getSelectedObject();
-        if (selectedIssue != null) {
-            final StringBuilder stringBuilder = new StringBuilder();
-            stringBuilder.append("<style>")
-                    .append(".comment {color: #000; background-color: #ddffff; padding: 5px 10px; border-left: 6px solid #ccc; display:inline}")
-                    .append("p {padding-left:10px;}")
-                    .append("</style>");
-            String description = fromMarkDownToHtml(selectedIssue.getDescription());
-            stringBuilder.append(description)
-                    .append("<br/>");
-            final Comment[] comments = selectedIssue.getComments();
-            for (Comment comment : comments) {
-                stringBuilder.append("<div class=\"comment\">")
-                        .append("<div class=\"comment_author_date\"><strong>")
-                        .append(comment.getAuthor()).append("&nbsp;")
-                        .append("(")
-                        .append(getValueOfDate(comment.getDate()))
-                        .append(")")
-                        .append("</strong></div>")
-                        .append(fromMarkDownToHtml(comment.getText()))
-                        .append("</div><br/>");
+        mIssuesTable.getSelectionModel().addListSelectionListener(e -> {
+            final Task selectedIssue = mIssuesTable.getSelectedObject();
+            if (selectedIssue != null) {
+                mPresenter.showSummary(selectedIssue);
             }
-            mIssueSummaryTextPane.setText(stringBuilder.toString());
-        }
+        });
+        mIssueSummaryTextPane.addHyperlinkListener(new BrowserHyperlinkListener());
+
     }
 
     /**

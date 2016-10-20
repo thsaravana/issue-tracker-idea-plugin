@@ -19,7 +19,7 @@ public class IssuesToolWindow implements ToolWindowFactory {
         toolWindow.setTitle(TOOL_WINDOW_ID);
 
         final IssuesToolWindowPanel panel = new IssuesToolWindowPanel(toolWindow);
-        panel.init();
+        panel.init(project);
     }
 
 }

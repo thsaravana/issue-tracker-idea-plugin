@@ -1,8 +1,11 @@
 package com.madrapps.issuetracker.listissues;
 
+import com.intellij.openapi.project.Project;
+import com.intellij.tasks.Comment;
 import com.intellij.tasks.Task;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
@@ -26,6 +29,13 @@ public interface IListIssuesContract {
          *                    the existing issues in the table
          */
         void updateIssueList(@NotNull List<Task> issuesList, boolean forceUpdate);
+
+        void init(@NotNull Project project);
+
+        /**
+         * Show the summary for the selected issue in the summary panel
+         */
+        void showSummary(@Nullable String description, @Nullable Comment[] comments);
     }
 
     /**
@@ -33,5 +43,14 @@ public interface IListIssuesContract {
      */
     interface IPresenter {
 
+        void pullIssues(@NotNull Project project, @Nullable String query);
+
+        void pullIssues(@NotNull Project project, @Nullable String query, int offset, int limit);
+
+        void showSummary(@NotNull Task selectedIssue);
+
+        void setView(@NotNull Project project);
+
+        void setView(@NotNull IView view);
     }
 }

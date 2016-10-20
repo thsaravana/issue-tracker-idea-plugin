@@ -3,17 +3,7 @@ package com.madrapps.issuetracker.actions;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.wm.ToolWindow;
-import com.intellij.openapi.wm.ToolWindowManager;
-import com.intellij.tasks.Task;
-import com.intellij.tasks.TaskManager;
-import com.intellij.ui.content.Content;
-import com.madrapps.issuetracker.listissues.IListIssuesContract;
-import com.madrapps.issuetracker.listissues.IssuesToolWindow;
-
-import java.util.List;
-
-import javax.swing.JComponent;
+import com.madrapps.issuetracker.listissues.ListIssuesPresenter;
 
 /**
  * Action to reload the issues from the task repository
@@ -28,20 +18,9 @@ public class RefreshIssueListAction extends AnAction {
     public void actionPerformed(AnActionEvent e) {
         final Project project = e.getProject();
         if (project != null) {
-            final ToolWindow toolWindow = ToolWindowManager.getInstance(project).getToolWindow(IssuesToolWindow.TOOL_WINDOW_ID);
-            final Content content = toolWindow.getContentManager().getContent(0);
-            if (content != null) {
-                final JComponent issueToolWindow = content.getComponent();
-                if (issueToolWindow instanceof IListIssuesContract.IView) {
-                    final TaskManager component = project.getComponent(TaskManager.class);
-                    if (component != null) {
-                        final List<Task> issuesList = component.getIssues(null);
-                        if (issuesList != null) {
-                            ((IListIssuesContract.IView) issueToolWindow).updateIssueList(issuesList, false);
-                        }
-                    }
-                }
-            }
+            final ListIssuesPresenter presenter = ListIssuesPresenter.getInstance();
+            presenter.setView(project);
+            presenter.pullIssues(project, null);
         }
     }
 }
