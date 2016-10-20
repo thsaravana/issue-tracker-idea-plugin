@@ -130,7 +130,14 @@ public class IssuesToolWindowPanel extends SimpleToolWindowPanel implements ILis
         if (forceUpdate) {
             mIssueList.clear();
         }
-        issuesList.stream().filter(task -> !mIssueList.contains(task)).forEach(task -> mIssueList.add(task));
+        issuesList.forEach(task -> {
+            final int index = mIssueList.indexOf(task);
+            if (index != -1) {
+                mIssueList.set(index, task);
+            } else {
+                mIssueList.add(task);
+            }
+        });
         final ListTableModel<Task> model = new ListTableModel<>(COLUMN_NAMES, mIssueList, 0);
         mIssuesTable.setModelAndUpdateColumns(model);
         showSummary();
