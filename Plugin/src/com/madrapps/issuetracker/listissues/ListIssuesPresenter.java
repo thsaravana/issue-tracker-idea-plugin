@@ -63,9 +63,10 @@ public class ListIssuesPresenter implements IListIssuesContract.IPresenter {
 
     @Override
     public void showSummary(@NotNull Task selectedIssue) {
-        String description = selectedIssue.getDescription();
+        final String description = selectedIssue.getDescription();
+        final String issueUrl = selectedIssue.getIssueUrl();
         // Show the description immediately, lets replace this later with the full summary.
-        mView.showSummary(description, null);
+        mView.showSummary(description, issueUrl, null);
         final Backgroundable backgroundableTask = new Backgroundable(null, "Getting Comments...", true) {
 
             private Comment[] comments;
@@ -77,7 +78,7 @@ public class ListIssuesPresenter implements IListIssuesContract.IPresenter {
 
             @Override
             public void onSuccess() {
-                mView.showSummary(description, comments);
+                mView.showSummary(description, issueUrl, comments);
             }
         };
         final ProgressIndicator indicator = new BackgroundableProcessIndicator(backgroundableTask);

@@ -35,7 +35,7 @@ public interface IListIssuesContract {
         /**
          * Show the summary for the selected issue in the summary panel
          */
-        void showSummary(@Nullable String description, @Nullable Comment[] comments);
+        void showSummary(@Nullable String description, @Nullable String issueUrl, @Nullable Comment[] comments);
 
         void showLoadingScreen(boolean shouldShow);
 

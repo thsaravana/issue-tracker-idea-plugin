@@ -11,6 +11,7 @@ import com.intellij.openapi.util.Comparing;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.tasks.Comment;
 import com.intellij.tasks.Task;
+import com.intellij.tasks.TaskRepository;
 import com.intellij.ui.BrowserHyperlinkListener;
 import com.intellij.ui.content.Content;
 import com.intellij.ui.content.ContentFactory;
@@ -31,6 +32,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 import javax.swing.Icon;
 import javax.swing.JFormattedTextField;
@@ -53,6 +55,25 @@ public class IssuesToolWindowPanel extends SimpleToolWindowPanel implements ILis
 
         public Comparator<Task> getComparator() {
             return (o, o1) -> o.getPresentableName().compareTo(o1.getPresentableName());
+        }
+    };
+    private final static ColumnInfo<Task, String> REPOSITORY_TYPE = new ColumnInfo<Task, String>("Repository") {
+        public String valueOf(Task object) {
+            final TaskRepository repository = object.getRepository();
+            if (repository != null) {
+                return repository.getRepositoryType().getName();
+            }
+            return "";
+        }
+
+        public Comparator<Task> getComparator() {
+            return (o, o1) -> {
+                if (o.getRepository() != null && o1.getRepository() != null) {
+                    return o.getRepository().getRepositoryType().getName().compareTo(o1.getRepository().getRepositoryType().getName());
+                } else {
+                    return 0;
+                }
+            };
         }
     };
     private final static ColumnInfo<Task, Icon> ICON = new ColumnInfo<Task, Icon>("") {
@@ -105,7 +126,7 @@ public class IssuesToolWindowPanel extends SimpleToolWindowPanel implements ILis
         }
     };
     /** The columns of the issues table */
-    private static final ColumnInfo[] COLUMN_NAMES = {ICON, PRESENTABLE_NAME, CREATED_ON, LAST_UPDATED};
+    private static final ColumnInfo[] COLUMN_NAMES = {ICON, PRESENTABLE_NAME, CREATED_ON, LAST_UPDATED, REPOSITORY_TYPE};
     /** To parse the Markdown text */
     private static final Parser MARKDOWN_PARSER = Parser.builder().build();
     /** To render the markdown as html */
@@ -160,7 +181,7 @@ public class IssuesToolWindowPanel extends SimpleToolWindowPanel implements ILis
     }
 
     @Override
-    public void showSummary(@Nullable String description, @Nullable Comment[] comments) {
+    public void showSummary(@Nullable String description, @Nullable String issueUrl, @Nullable Comment[] comments) {
         final StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("<style>")
                 .append(".comment {color: #000; background-color: #ddffff; padding: 5px 10px; border-left: 6px solid #ccc; display:inline}")
@@ -181,6 +202,10 @@ public class IssuesToolWindowPanel extends SimpleToolWindowPanel implements ILis
                         .append(fromMarkDownToHtml(comment.getText()))
                         .append("</div><br/>");
             }
+        }
+        if (issueUrl != null) {
+            stringBuilder.append(String.format(Locale.US, "<a href=%s>%s</a>", issueUrl, issueUrl))
+                    .append("<br/>");
         }
         mIssueSummaryTextPane.setText(stringBuilder.toString());
     }

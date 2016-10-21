@@ -105,6 +105,8 @@
             </constraints>
             <properties>
               <alignmentX value="0.5"/>
+              <editable value="false"/>
+              <enabled value="true"/>
               <horizontalAlignment value="0"/>
               <text value="Loading..."/>
             </properties>
