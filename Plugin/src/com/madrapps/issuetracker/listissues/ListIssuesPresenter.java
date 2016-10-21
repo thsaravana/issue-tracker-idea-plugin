@@ -31,7 +31,7 @@ public class ListIssuesPresenter implements IListIssuesContract.IPresenter {
 
     @Override
     public void pullIssues(@NotNull Project project, @Nullable String query) {
-        pullIssues(project, query, 0, 20);
+        pullIssues(project, query, 0, 100);
     }
 
     @Override
@@ -44,7 +44,7 @@ public class ListIssuesPresenter implements IListIssuesContract.IPresenter {
 
                 @Override
                 public void run(@NotNull ProgressIndicator indicator) {
-                    issuesList = taskManager.getIssues(query, offset, limit, true, indicator, true);
+                    issuesList = taskManager.getIssues(query, offset, limit, false, indicator, true);
                 }
 
                 @Override
@@ -85,6 +85,35 @@ public class ListIssuesPresenter implements IListIssuesContract.IPresenter {
     }
 
     @Override
+    public void loadInitialIssues(@NotNull Project project) {
+        mView.showLoadingScreen(true);
+        final TaskManager taskManager = project.getComponent(TaskManager.class);
+        if (taskManager != null) {
+            final Backgroundable backgroundableTask = new Backgroundable(project, "Syncing Issues...", true) {
+
+                private List<Task> issuesList;
+
+                @Override
+                public void run(@NotNull ProgressIndicator indicator) {
+                    issuesList = taskManager.getIssues(null, 0, 100, false, indicator, true);
+                }
+
+                @Override
+                public void onSuccess() {
+                    mView.showLoadingScreen(false);
+                    if (issuesList != null && !issuesList.isEmpty()) {
+                        mView.updateIssueList(issuesList, false);
+                    } else {
+                        mView.showEmptyIssueListScreen();
+                    }
+                }
+            };
+            final ProgressIndicator indicator = new BackgroundableProcessIndicator(backgroundableTask);
+            ProgressManager.getInstance().runProcessWithProgressAsynchronously(backgroundableTask, indicator);
+        }
+    }
+
+    @Override
     public void setView(@NotNull Project project) {
         if (mView == null) {
             final ToolWindow toolWindow = ToolWindowManager.getInstance(project).getToolWindow(IssuesToolWindow.TOOL_WINDOW_ID);
@@ -101,35 +130,6 @@ public class ListIssuesPresenter implements IListIssuesContract.IPresenter {
     @Override
     public void setView(@NotNull IListIssuesContract.IView view) {
         mView = view;
-    }
-
-    @Override
-    public void loadInitialIssues(@NotNull Project project) {
-        mView.showLoadingScreen(true);
-        final TaskManager taskManager = project.getComponent(TaskManager.class);
-        if (taskManager != null) {
-            final Backgroundable backgroundableTask = new Backgroundable(project, "Syncing Issues...", true) {
-
-                private List<Task> issuesList;
-
-                @Override
-                public void run(@NotNull ProgressIndicator indicator) {
-                    issuesList = taskManager.getIssues(null);
-                }
-
-                @Override
-                public void onSuccess() {
-                    mView.showLoadingScreen(false);
-                    if (issuesList != null && !issuesList.isEmpty()) {
-                        mView.updateIssueList(issuesList, false);
-                    } else {
-                        mView.showEmptyIssueListScreen();
-                    }
-                }
-            };
-            final ProgressIndicator indicator = new BackgroundableProcessIndicator(backgroundableTask);
-            ProgressManager.getInstance().runProcessWithProgressAsynchronously(backgroundableTask, indicator);
-        }
     }
 
     public static ListIssuesPresenter getInstance() {
