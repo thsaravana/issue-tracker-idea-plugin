@@ -36,6 +36,10 @@ public interface IListIssuesContract {
          * Show the summary for the selected issue in the summary panel
          */
         void showSummary(@Nullable String description, @Nullable Comment[] comments);
+
+        void showLoadingScreen(boolean shouldShow);
+
+        void showEmptyIssueListScreen();
     }
 
     /**
@@ -48,6 +52,8 @@ public interface IListIssuesContract {
         void pullIssues(@NotNull Project project, @Nullable String query, int offset, int limit);
 
         void showSummary(@NotNull Task selectedIssue);
+
+        void loadInitialIssues(@NotNull Project project);
 
         void setView(@NotNull Project project);
 

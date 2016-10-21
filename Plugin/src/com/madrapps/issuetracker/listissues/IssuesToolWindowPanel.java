@@ -26,12 +26,14 @@ import org.commonmark.renderer.html.HtmlRenderer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.awt.CardLayout;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
 import javax.swing.Icon;
+import javax.swing.JFormattedTextField;
 import javax.swing.JPanel;
 import javax.swing.JTable;
 import javax.swing.JTextPane;
@@ -115,6 +117,9 @@ public class IssuesToolWindowPanel extends SimpleToolWindowPanel implements ILis
     /** The summary panel that shows the details of an issue when it's selected from the table */
     private JTextPane mIssueSummaryTextPane;
     private JPanel mToolbar;
+    private JFormattedTextField mEmptyMessageTextField;
+    private JPanel mIssuesListPanel;
+    private JPanel mSummaryPanel;
     /** The list that's backing up the {@code mIssuesTable} */
     private List<Task> mIssueList;
     private ListIssuesPresenter mPresenter;
@@ -142,6 +147,8 @@ public class IssuesToolWindowPanel extends SimpleToolWindowPanel implements ILis
         });
         final ListTableModel<Task> model = new ListTableModel<>(COLUMN_NAMES, mIssueList, 0);
         mIssuesTable.setModelAndUpdateColumns(model);
+        final CardLayout layout = (CardLayout) mIssuesListPanel.getLayout();
+        layout.show(mIssuesListPanel, "CardTABLE");
     }
 
     @Override
@@ -149,7 +156,7 @@ public class IssuesToolWindowPanel extends SimpleToolWindowPanel implements ILis
         initializeComponents();
         initializeActions();
 
-        mPresenter.pullIssues(project, null);
+        mPresenter.loadInitialIssues(project);
     }
 
     @Override
@@ -176,6 +183,28 @@ public class IssuesToolWindowPanel extends SimpleToolWindowPanel implements ILis
             }
         }
         mIssueSummaryTextPane.setText(stringBuilder.toString());
+    }
+
+    @Override
+    public void showLoadingScreen(boolean shouldShow) {
+        final CardLayout layout = (CardLayout) mIssuesListPanel.getLayout();
+        if (shouldShow) {
+            mEmptyMessageTextField.setText("Loading...");
+            layout.show(mIssuesListPanel, "CardEMPTY");
+        } else {
+            layout.show(mIssuesListPanel, "CardTABLE");
+        }
+    }
+
+    @Override
+    public void showEmptyIssueListScreen() {
+        // Show the Empty message instead of the issues table
+        final CardLayout layout = (CardLayout) mIssuesListPanel.getLayout();
+        mEmptyMessageTextField.setText("You have no Issues in repository");
+        layout.show(mIssuesListPanel, "CardEMPTY");
+
+        // Clear the summary
+        mIssueSummaryTextPane.setText("");
     }
 
     /**

@@ -39,7 +39,7 @@
         </action>
         <action class="com.madrapps.issuetracker.actions.RefreshIssueListAction"
                 description="Reloads the issues from the task repository"
-                icon="AllIcons.Actions.ForceRefresh"
+                icon="AllIcons.Actions.Refresh"
                 id="IssueTracker.RefreshIssueList" text="Refresh"/>
     </actions>
 </idea-plugin>

@@ -49,8 +49,10 @@ public class ListIssuesPresenter implements IListIssuesContract.IPresenter {
 
                 @Override
                 public void onSuccess() {
-                    if (issuesList != null) {
+                    if (issuesList != null && !issuesList.isEmpty()) {
                         mView.updateIssueList(issuesList, false);
+                    } else {
+                        mView.showEmptyIssueListScreen();
                     }
                 }
             };
@@ -62,6 +64,8 @@ public class ListIssuesPresenter implements IListIssuesContract.IPresenter {
     @Override
     public void showSummary(@NotNull Task selectedIssue) {
         String description = selectedIssue.getDescription();
+        // Show the description immediately, lets replace this later with the full summary.
+        mView.showSummary(description, null);
         final Backgroundable backgroundableTask = new Backgroundable(null, "Getting Comments...", true) {
 
             private Comment[] comments;
@@ -97,6 +101,35 @@ public class ListIssuesPresenter implements IListIssuesContract.IPresenter {
     @Override
     public void setView(@NotNull IListIssuesContract.IView view) {
         mView = view;
+    }
+
+    @Override
+    public void loadInitialIssues(@NotNull Project project) {
+        mView.showLoadingScreen(true);
+        final TaskManager taskManager = project.getComponent(TaskManager.class);
+        if (taskManager != null) {
+            final Backgroundable backgroundableTask = new Backgroundable(project, "Syncing Issues...", true) {
+
+                private List<Task> issuesList;
+
+                @Override
+                public void run(@NotNull ProgressIndicator indicator) {
+                    issuesList = taskManager.getIssues(null);
+                }
+
+                @Override
+                public void onSuccess() {
+                    mView.showLoadingScreen(false);
+                    if (issuesList != null && !issuesList.isEmpty()) {
+                        mView.updateIssueList(issuesList, false);
+                    } else {
+                        mView.showEmptyIssueListScreen();
+                    }
+                }
+            };
+            final ProgressIndicator indicator = new BackgroundableProcessIndicator(backgroundableTask);
+            ProgressManager.getInstance().runProcessWithProgressAsynchronously(backgroundableTask, indicator);
+        }
     }
 
     public static ListIssuesPresenter getInstance() {
