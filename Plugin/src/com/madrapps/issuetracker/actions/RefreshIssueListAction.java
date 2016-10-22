@@ -3,6 +3,7 @@ package com.madrapps.issuetracker.actions;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.project.Project;
+import com.madrapps.issuetracker.listissues.IListIssuesContract.IPresenter;
 import com.madrapps.issuetracker.listissues.ListIssuesPresenter;
 
 /**
@@ -18,7 +19,7 @@ public class RefreshIssueListAction extends AnAction {
     public void actionPerformed(AnActionEvent e) {
         final Project project = e.getProject();
         if (project != null) {
-            final ListIssuesPresenter presenter = ListIssuesPresenter.getInstance();
+            final IPresenter presenter = ListIssuesPresenter.getInstance();
             presenter.setView(project);
             presenter.pullIssues(project, null);
         }

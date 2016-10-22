@@ -115,7 +115,8 @@ public class ListIssuesPresenter implements IListIssuesContract.IPresenter {
     }
 
     @Override
-    public void setView(@NotNull Project project) {
+    @NotNull
+    public IListIssuesContract.IView setView(@NotNull Project project) {
         if (mView == null) {
             final ToolWindow toolWindow = ToolWindowManager.getInstance(project).getToolWindow(IssuesToolWindow.TOOL_WINDOW_ID);
             final Content content = toolWindow.getContentManager().getContent(0);
@@ -126,11 +127,22 @@ public class ListIssuesPresenter implements IListIssuesContract.IPresenter {
                 }
             }
         }
+        return mView;
     }
 
     @Override
-    public void setView(@NotNull IListIssuesContract.IView view) {
+    @NotNull
+    public IListIssuesContract.IView setView(@NotNull IListIssuesContract.IView view) {
         mView = view;
+        return mView;
+    }
+
+    @Override
+    public void openUrl(@NotNull Task selectedIssue) {
+        final String issueUrl = selectedIssue.getIssueUrl();
+        if (issueUrl != null) {
+            mView.openInBrowser(issueUrl);
+        }
     }
 
     public static ListIssuesPresenter getInstance() {

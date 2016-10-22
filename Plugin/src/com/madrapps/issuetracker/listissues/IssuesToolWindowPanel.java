@@ -1,5 +1,6 @@
 package com.madrapps.issuetracker.listissues;
 
+import com.intellij.ide.BrowserUtil;
 import com.intellij.openapi.actionSystem.ActionManager;
 import com.intellij.openapi.actionSystem.ActionPlaces;
 import com.intellij.openapi.actionSystem.ActionToolbar;
@@ -19,6 +20,7 @@ import com.intellij.ui.table.TableView;
 import com.intellij.util.text.DateFormatUtil;
 import com.intellij.util.ui.ColumnInfo;
 import com.intellij.util.ui.ListTableModel;
+import com.madrapps.issuetracker.actions.OpenIssueInBrowserAction;
 import com.madrapps.issuetracker.actions.RefreshIssueListAction;
 
 import org.commonmark.node.Node;
@@ -232,6 +234,17 @@ public class IssuesToolWindowPanel extends SimpleToolWindowPanel implements ILis
         mIssueSummaryTextPane.setText("");
     }
 
+    @Override
+    public void openInBrowser(@NotNull String issueUrl) {
+        BrowserUtil.browse(issueUrl);
+    }
+
+    @Nullable
+    @Override
+    public Task getSelectedIssue() {
+        return mIssuesTable.getSelectedObject();
+    }
+
     /**
      * Get a neat readable format of the date if it's not null, or an empty string
      *
@@ -249,9 +262,12 @@ public class IssuesToolWindowPanel extends SimpleToolWindowPanel implements ILis
 
     private void initializeActions() {
         final AnAction refreshAction = ActionManager.getInstance().getAction(RefreshIssueListAction.ACTION_ID);
+        final AnAction openIssueInBrowserAction = ActionManager.getInstance().getAction(OpenIssueInBrowserAction.ACTION_ID);
+
 
         final DefaultActionGroup actionGroup = new DefaultActionGroup();
         actionGroup.add(refreshAction);
+        actionGroup.add(openIssueInBrowserAction);
 
         final ActionToolbar actionToolbar = ActionManager.getInstance().createActionToolbar(ActionPlaces.UNKNOWN, actionGroup, false);
         actionToolbar.setTargetComponent(mToolbar);

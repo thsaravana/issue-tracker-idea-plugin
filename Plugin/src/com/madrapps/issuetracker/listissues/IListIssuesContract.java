@@ -40,6 +40,11 @@ public interface IListIssuesContract {
         void showLoadingScreen(boolean shouldShow);
 
         void showEmptyIssueListScreen();
+
+        void openInBrowser(@NotNull String issueUrl);
+
+        @Nullable
+        Task getSelectedIssue();
     }
 
     /**
@@ -55,8 +60,12 @@ public interface IListIssuesContract {
 
         void loadInitialIssues(@NotNull Project project);
 
-        void setView(@NotNull Project project);
+        @NotNull
+        IView setView(@NotNull Project project);
 
-        void setView(@NotNull IView view);
+        @NotNull
+        IView setView(@NotNull IView view);
+
+        void openUrl(@NotNull Task selectedIssue);
     }
 }

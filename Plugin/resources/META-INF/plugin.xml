@@ -41,5 +41,10 @@
                 description="Reloads the issues from the task repository"
                 icon="AllIcons.Actions.Refresh"
                 id="IssueTracker.RefreshIssueList" text="Refresh"/>
+        <action class="com.madrapps.issuetracker.actions.OpenIssueInBrowserAction"
+                description="Opens the issue in the respective repository in the browser"
+                icon="AllIcons.General.Web"
+                id="IssueTracker.OpenIssueInBrowser"
+                text="Open Issue in Browser"/>
     </actions>
 </idea-plugin>
