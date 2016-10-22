@@ -14,6 +14,7 @@ import com.intellij.tasks.Comment;
 import com.intellij.tasks.Task;
 import com.intellij.tasks.TaskRepository;
 import com.intellij.ui.BrowserHyperlinkListener;
+import com.intellij.ui.PopupHandler;
 import com.intellij.ui.content.Content;
 import com.intellij.ui.content.ContentFactory;
 import com.intellij.ui.table.TableView;
@@ -278,13 +279,15 @@ public class IssuesToolWindowPanel extends SimpleToolWindowPanel implements ILis
 
 
         final DefaultActionGroup actionGroup = new DefaultActionGroup();
-        actionGroup.add(refreshAction);
         actionGroup.add(openIssueInBrowserAction);
+        actionGroup.add(refreshAction);
         actionGroup.add(showDetailsPanelAction);
 
         final ActionToolbar actionToolbar = ActionManager.getInstance().createActionToolbar(ActionPlaces.UNKNOWN, actionGroup, false);
         actionToolbar.setTargetComponent(mToolbar);
         mToolbar.add(actionToolbar.getComponent());
+
+        PopupHandler.installPopupHandler(mIssuesTable, actionGroup, ActionPlaces.UPDATE_POPUP, ActionManager.getInstance());
     }
 
     /**

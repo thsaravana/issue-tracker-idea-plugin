@@ -21,7 +21,7 @@ public class RefreshIssueListAction extends AnAction {
         if (project != null) {
             final IPresenter presenter = ListIssuesPresenter.getInstance();
             presenter.setView(project);
-            presenter.pullIssues(project, null);
+            presenter.pullIssues(project, null, true);
         }
     }
 }

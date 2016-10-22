@@ -56,9 +56,9 @@ public interface IListIssuesContract {
      */
     interface IPresenter {
 
-        void pullIssues(@NotNull Project project, @Nullable String query);
+        void pullIssues(@NotNull Project project, @Nullable String query, boolean force);
 
-        void pullIssues(@NotNull Project project, @Nullable String query, int offset, int limit);
+        void pullIssues(@NotNull Project project, @Nullable String query, int offset, int limit, boolean force);
 
         void showSummary(@NotNull Task selectedIssue);
 

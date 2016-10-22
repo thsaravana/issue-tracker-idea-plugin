@@ -30,12 +30,12 @@ public class ListIssuesPresenter implements IListIssuesContract.IPresenter {
     private IListIssuesContract.IView mView;
 
     @Override
-    public void pullIssues(@NotNull Project project, @Nullable String query) {
-        pullIssues(project, query, 0, 100);
+    public void pullIssues(@NotNull Project project, @Nullable String query, boolean force) {
+        pullIssues(project, query, 0, 100, force);
     }
 
     @Override
-    public void pullIssues(@NotNull Project project, @Nullable String query, int offset, int limit) {
+    public void pullIssues(@NotNull Project project, @Nullable String query, int offset, int limit, boolean force) {
         final TaskManager taskManager = project.getComponent(TaskManager.class);
         if (taskManager != null) {
             final Backgroundable backgroundableTask = new Backgroundable(project, "Syncing Issues...", true) {
@@ -50,7 +50,7 @@ public class ListIssuesPresenter implements IListIssuesContract.IPresenter {
                 @Override
                 public void onSuccess() {
                     if (issuesList != null && !issuesList.isEmpty()) {
-                        mView.updateIssueList(issuesList, false);
+                        mView.updateIssueList(issuesList, force);
                     } else {
                         mView.showEmptyIssueListScreen();
                     }
