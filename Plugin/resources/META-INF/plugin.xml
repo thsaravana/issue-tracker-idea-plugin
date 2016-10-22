@@ -46,5 +46,8 @@
                 icon="AllIcons.General.Web"
                 id="IssueTracker.OpenIssueInBrowser"
                 text="Open Issue in Browser"/>
+        <action class="com.madrapps.issuetracker.actions.ShowDetailsPanelAction"
+                description="Display details panel" icon="AllIcons.Actions.Preview"
+                id="IssueTracker.ShowDetailsPanel" text="Show Details"/>
     </actions>
 </idea-plugin>

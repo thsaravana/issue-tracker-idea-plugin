@@ -22,6 +22,7 @@ import com.intellij.util.ui.ColumnInfo;
 import com.intellij.util.ui.ListTableModel;
 import com.madrapps.issuetracker.actions.OpenIssueInBrowserAction;
 import com.madrapps.issuetracker.actions.RefreshIssueListAction;
+import com.madrapps.issuetracker.actions.ShowDetailsPanelAction;
 
 import org.commonmark.node.Node;
 import org.commonmark.parser.Parser;
@@ -239,10 +240,20 @@ public class IssuesToolWindowPanel extends SimpleToolWindowPanel implements ILis
         BrowserUtil.browse(issueUrl);
     }
 
+    @Override
+    public void showDetailsPanel(boolean shouldShow) {
+        mSummaryPanel.setVisible(shouldShow);
+    }
+
     @Nullable
     @Override
     public Task getSelectedIssue() {
         return mIssuesTable.getSelectedObject();
+    }
+
+    @Override
+    public boolean isDetailsPanelShown() {
+        return mSummaryPanel.isVisible();
     }
 
     /**
@@ -263,11 +274,13 @@ public class IssuesToolWindowPanel extends SimpleToolWindowPanel implements ILis
     private void initializeActions() {
         final AnAction refreshAction = ActionManager.getInstance().getAction(RefreshIssueListAction.ACTION_ID);
         final AnAction openIssueInBrowserAction = ActionManager.getInstance().getAction(OpenIssueInBrowserAction.ACTION_ID);
+        final AnAction showDetailsPanelAction = ActionManager.getInstance().getAction(ShowDetailsPanelAction.ACTION_ID);
 
 
         final DefaultActionGroup actionGroup = new DefaultActionGroup();
         actionGroup.add(refreshAction);
         actionGroup.add(openIssueInBrowserAction);
+        actionGroup.add(showDetailsPanelAction);
 
         final ActionToolbar actionToolbar = ActionManager.getInstance().createActionToolbar(ActionPlaces.UNKNOWN, actionGroup, false);
         actionToolbar.setTargetComponent(mToolbar);

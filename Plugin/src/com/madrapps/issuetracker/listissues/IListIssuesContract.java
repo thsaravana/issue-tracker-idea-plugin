@@ -43,8 +43,12 @@ public interface IListIssuesContract {
 
         void openInBrowser(@NotNull String issueUrl);
 
+        void showDetailsPanel(boolean shouldShow);
+
         @Nullable
         Task getSelectedIssue();
+
+        boolean isDetailsPanelShown();
     }
 
     /**
@@ -67,5 +71,9 @@ public interface IListIssuesContract {
         IView setView(@NotNull IView view);
 
         void openUrl(@NotNull Task selectedIssue);
+
+        void showDetailsPanel(boolean shouldShow);
+
+        boolean isDetailsPanelShown();
     }
 }

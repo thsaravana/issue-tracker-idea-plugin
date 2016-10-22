@@ -145,6 +145,16 @@ public class ListIssuesPresenter implements IListIssuesContract.IPresenter {
         }
     }
 
+    @Override
+    public void showDetailsPanel(boolean shouldShow) {
+        mView.showDetailsPanel(shouldShow);
+    }
+
+    @Override
+    public boolean isDetailsPanelShown() {
+        return mView.isDetailsPanelShown();
+    }
+
     public static ListIssuesPresenter getInstance() {
         return mInstance;
     }
