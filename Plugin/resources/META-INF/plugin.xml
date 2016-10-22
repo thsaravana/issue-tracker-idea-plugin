@@ -30,13 +30,6 @@
     </extensions>
 
     <actions>
-        <!-- Add your actions here -->
-        <action class="com.madrapps.issuetracker.actions.CheckTask"
-                description="Check the task, sample only" id="CheckTask"
-                text="CheckTask">
-            <add-to-group anchor="last" group-id="HelpMenu"/>
-            <keyboard-shortcut first-keystroke="shift ctrl B" keymap="$default"/>
-        </action>
         <action class="com.madrapps.issuetracker.actions.RefreshIssueListAction"
                 description="Reloads the issues from the task repository"
                 icon="AllIcons.Actions.Refresh"

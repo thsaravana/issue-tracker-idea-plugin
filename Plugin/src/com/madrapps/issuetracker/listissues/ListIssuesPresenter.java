@@ -20,13 +20,14 @@ import java.util.List;
 import javax.swing.JComponent;
 
 /**
- * This is where we will
+ * This is where we will process all requests coming from various actions and from the Tool window itself
  * <p>
  * Created by Henry on 10/20/2016.
  */
 public class ListIssuesPresenter implements IListIssuesContract.IPresenter {
-
+    /** Singleton Instance */
     private static final ListIssuesPresenter mInstance = new ListIssuesPresenter();
+    /** the view */
     private IListIssuesContract.IView mView;
 
     @Override
@@ -62,11 +63,11 @@ public class ListIssuesPresenter implements IListIssuesContract.IPresenter {
     }
 
     @Override
-    public void showSummary(@NotNull Task selectedIssue) {
+    public void showDetails(@NotNull Task selectedIssue) {
         final String description = selectedIssue.getDescription();
         final String issueUrl = selectedIssue.getIssueUrl();
         // Show the description immediately, lets replace this later with the full summary.
-        mView.showSummary(description, issueUrl, null);
+        mView.showDetails(description, issueUrl, null);
         final Backgroundable backgroundableTask = new Backgroundable(null, "Getting Comments...", true) {
 
             private Comment[] comments;
@@ -78,7 +79,7 @@ public class ListIssuesPresenter implements IListIssuesContract.IPresenter {
 
             @Override
             public void onSuccess() {
-                mView.showSummary(description, issueUrl, comments);
+                mView.showDetails(description, issueUrl, comments);
             }
         };
         final ProgressIndicator indicator = new BackgroundableProcessIndicator(backgroundableTask);
@@ -155,6 +156,11 @@ public class ListIssuesPresenter implements IListIssuesContract.IPresenter {
         return mView.isDetailsPanelShown();
     }
 
+    /**
+     * Get an instance of the Presenter
+     *
+     * @return the singleton instance
+     */
     public static ListIssuesPresenter getInstance() {
         return mInstance;
     }

@@ -12,6 +12,8 @@ import org.jetbrains.annotations.NotNull;
  * Created by Henry on 10/17/2016.
  */
 public class IssuesToolWindow implements ToolWindowFactory {
+
+    /** Tool Window ID. This should be the same as in the Plugin xml */
     static final String TOOL_WINDOW_ID = "Issue Tracker";
 
     @Override

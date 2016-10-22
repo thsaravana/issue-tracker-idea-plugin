@@ -17,6 +17,7 @@ import org.jetbrains.annotations.Nullable;
  */
 public class OpenIssueInBrowserAction extends AnAction {
 
+    /** Action ID. This should be the same as in the Plugin xml */
     public static final String ACTION_ID = "IssueTracker.OpenIssueInBrowser";
 
     @Override
