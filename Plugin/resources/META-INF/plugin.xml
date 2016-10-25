@@ -1,0 +1,46 @@
+<idea-plugin version="2">
+    <id>com.madrapps.issuetracker.plugin</id>
+    <name>Issue Tracker</name>
+    <version>0.1</version>
+    <vendor email="madrasappfactory@gmail.com" url="http://madrapps.github.io">Madrapps</vendor>
+
+    <description><![CDATA[
+      Enter short description for your plugin here.<br>
+    ]]></description>
+
+    <change-notes><![CDATA[
+      Initial Commit<br>
+    ]]>
+    </change-notes>
+
+    <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/build_number_ranges.html for description -->
+    <idea-version since-build="141.0"/>
+
+    <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html
+         on how to target different products -->
+    <!-- uncomment to enable plugin in all products
+    <depends>com.intellij.modules.lang</depends>
+    -->
+    <depends>com.intellij.tasks</depends>
+    <extensions defaultExtensionNs="com.intellij">
+        <toolWindow anchor="bottom"
+                    factoryClass="com.madrapps.issuetracker.listissues.IssuesToolWindow"
+                    icon="/icons/issueTrackerToolWindow.png"
+                    id="Issue Tracker"/>
+    </extensions>
+
+    <actions>
+        <action class="com.madrapps.issuetracker.actions.RefreshIssueListAction"
+                description="Reloads the issues from the task repository"
+                icon="AllIcons.Actions.Refresh"
+                id="IssueTracker.RefreshIssueList" text="Refresh"/>
+        <action class="com.madrapps.issuetracker.actions.OpenIssueInBrowserAction"
+                description="Opens the issue in the respective repository in the browser"
+                icon="AllIcons.General.Web"
+                id="IssueTracker.OpenIssueInBrowser"
+                text="Open Issue in Browser"/>
+        <action class="com.madrapps.issuetracker.actions.ShowDetailsPanelAction"
+                description="Display details panel" icon="AllIcons.Actions.Preview"
+                id="IssueTracker.ShowDetailsPanel" text="Show Details"/>
+    </actions>
+</idea-plugin>
