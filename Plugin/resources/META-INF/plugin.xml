@@ -36,11 +36,16 @@
                 id="IssueTracker.RefreshIssueList" text="Refresh"/>
         <action class="com.madrapps.issuetracker.actions.OpenIssueInBrowserAction"
                 description="Opens the issue in the respective repository in the browser"
-                icon="AllIcons.General.Web"
+                icon="AllIcons.Nodes.PpWeb"
                 id="IssueTracker.OpenIssueInBrowser"
                 text="Open Issue in Browser"/>
         <action class="com.madrapps.issuetracker.actions.ShowDetailsPanelAction"
                 description="Display details panel" icon="AllIcons.Actions.Preview"
                 id="IssueTracker.ShowDetailsPanel" text="Show Details"/>
+        <action class="com.madrapps.issuetracker.actions.CreateTaskAction"
+                description="Create a Task for the issue"
+                icon="AllIcons.Welcome.CreateNewProjectfromExistingFiles"
+                id="IssueTracker.CreateTask"
+                text="Create Task"/>
     </actions>
 </idea-plugin>

@@ -17,6 +17,7 @@ import com.intellij.ui.content.Content;
 import com.intellij.ui.content.ContentFactory;
 import com.intellij.ui.table.TableView;
 import com.intellij.util.ui.ListTableModel;
+import com.madrapps.issuetracker.actions.CreateTaskAction;
 import com.madrapps.issuetracker.actions.OpenIssueInBrowserAction;
 import com.madrapps.issuetracker.actions.RefreshIssueListAction;
 import com.madrapps.issuetracker.actions.ShowDetailsPanelAction;
@@ -190,9 +191,11 @@ public class IssuesToolWindowPanel extends SimpleToolWindowPanel implements ILis
         final AnAction refreshAction = ActionManager.getInstance().getAction(RefreshIssueListAction.ACTION_ID);
         final AnAction openIssueInBrowserAction = ActionManager.getInstance().getAction(OpenIssueInBrowserAction.ACTION_ID);
         final AnAction showDetailsPanelAction = ActionManager.getInstance().getAction(ShowDetailsPanelAction.ACTION_ID);
+        final AnAction createTaskAction = ActionManager.getInstance().getAction(CreateTaskAction.ACTION_ID);
 
         final DefaultActionGroup actionGroup = new DefaultActionGroup();
         actionGroup.add(openIssueInBrowserAction);
+        actionGroup.add(createTaskAction);
         actionGroup.add(refreshAction);
         actionGroup.add(showDetailsPanelAction);
 
