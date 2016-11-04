@@ -13,6 +13,7 @@ import com.intellij.tasks.Comment;
 import com.intellij.tasks.Task;
 import com.intellij.ui.BrowserHyperlinkListener;
 import com.intellij.ui.PopupHandler;
+import com.intellij.ui.SearchTextFieldWithStoredHistory;
 import com.intellij.ui.content.Content;
 import com.intellij.ui.content.ContentFactory;
 import com.intellij.ui.table.TableView;
@@ -29,6 +30,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.awt.CardLayout;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -66,6 +69,8 @@ public class IssuesToolWindowPanel extends SimpleToolWindowPanel implements ILis
     private JPanel mIssuesListPanel;
     /** The Details panel component */
     private JPanel mDetailsPanel;
+    /** The search field */
+    private SearchTextFieldWithStoredHistory mSearchField;
     /** The list that's backing up the {@code mIssuesTable} */
     private List<Task> mIssueList;
     /** The presenter */
@@ -106,7 +111,7 @@ public class IssuesToolWindowPanel extends SimpleToolWindowPanel implements ILis
     public void init(@NotNull Project project) {
         initializeComponents();
         initializeActions();
-
+        initSearchField(project);
         // Load issues for the first time when the ToolWindow is opened
         mPresenter.loadInitialIssues(project);
     }
@@ -185,6 +190,36 @@ public class IssuesToolWindowPanel extends SimpleToolWindowPanel implements ILis
     }
 
     /**
+     * This method is invoked by the GUI-FORM to create components.
+     * Do not rename.
+     */
+    public void createUIComponents() {
+        mSearchField = new SearchTextFieldWithStoredHistory("IssueTracker.SearchField");
+        mSearchField.getTextEditor().setColumns(15);
+        mSearchField.setHistorySize(5);
+    }
+
+    private void initSearchField(@NotNull Project project) {
+        mSearchField.getTextEditor().addKeyListener(new KeyAdapter() {
+            //to consume enter in combo box - do not process this event by default button from DialogWrapper
+            public void keyPressed(final KeyEvent e) {
+                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                    e.consume();
+                    mSearchField.addCurrentTextToHistory();
+                    search(mSearchField.getText(), project);
+                } else if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
+                    mSearchField.reset();
+                }
+            }
+        });
+    }
+
+    // TODO much be updated
+    private void search(@NotNull String text, @NotNull Project project) {
+        mPresenter.pullIssues(project, text, true);
+    }
+
+    /**
      * Initializes all actions
      */
     private void initializeActions() {
@@ -200,7 +235,7 @@ public class IssuesToolWindowPanel extends SimpleToolWindowPanel implements ILis
         actionGroup.add(showDetailsPanelAction);
 
         // Show actions in the toolbar
-        final ActionToolbar actionToolbar = ActionManager.getInstance().createActionToolbar(ActionPlaces.UNKNOWN, actionGroup, false);
+        final ActionToolbar actionToolbar = ActionManager.getInstance().createActionToolbar(ActionPlaces.UNKNOWN, actionGroup, true);
         actionToolbar.setTargetComponent(mToolbar);
         mToolbar.add(actionToolbar.getComponent());
 
