@@ -35,7 +35,7 @@
                 icon="AllIcons.Actions.Refresh"
                 id="IssueTracker.RefreshIssueList" text="Refresh"/>
         <action class="com.madrapps.issuetracker.actions.OpenIssueInBrowserAction"
-                description="Opens the issue in the respective repository in the browser"
+                description="Opens the issue in browser"
                 icon="AllIcons.Nodes.PpWeb"
                 id="IssueTracker.OpenIssueInBrowser"
                 text="Open Issue in Browser"/>

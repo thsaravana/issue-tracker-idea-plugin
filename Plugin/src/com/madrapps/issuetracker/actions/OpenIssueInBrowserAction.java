@@ -5,10 +5,13 @@ import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.Presentation;
 import com.intellij.openapi.project.Project;
 import com.intellij.tasks.Task;
+import com.intellij.tasks.TaskRepository;
 import com.madrapps.issuetracker.listissues.IListIssuesContract;
 import com.madrapps.issuetracker.listissues.ListIssuesPresenter;
 
 import org.jetbrains.annotations.Nullable;
+
+import javax.swing.Icon;
 
 /**
  * This will open the IssueUrl of the issue on the Browser
@@ -24,7 +27,22 @@ public class OpenIssueInBrowserAction extends AnAction {
     public void update(AnActionEvent e) {
         final Presentation presentation = e.getPresentation();
         final Task selectedIssue = getSelectedIssue(e);
-        presentation.setEnabled(selectedIssue != null);
+        if (selectedIssue != null) {
+            presentation.setEnabled(true);
+            final TaskRepository repository = selectedIssue.getRepository();
+            if (repository != null) {
+                final Icon icon = repository.getIcon();
+                if (icon != null) {
+                    presentation.setIcon(icon);
+                }
+                final String repositoryName = repository.getRepositoryType().getName();
+                presentation.setText("Open in " + repositoryName);
+            } else {
+                setDefaultIcon(true);
+            }
+        } else {
+            presentation.setEnabled(false);
+        }
     }
 
     @Override

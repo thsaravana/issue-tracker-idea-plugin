@@ -16,6 +16,7 @@ import com.madrapps.issuetracker.listissues.ListIssuesPresenter;
  */
 public class CreateTaskAction extends AnAction {
 
+    /** Action ID. This should be the same as in the Plugin xml */
     public static final String ACTION_ID = "IssueTracker.CreateTask";
 
     @Override
