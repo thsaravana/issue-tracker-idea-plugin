@@ -20,15 +20,24 @@ public interface IListIssuesContract {
      * Interface to describe all actions that can be performed on the ToolWindow
      */
     interface IView {
+
+        /**
+         * Clears the search field
+         */
+        void clearSearchField();
+
+        /**
+         * Saves the text in search field to the search history
+         */
+        void saveSearchToHistory();
+
         /**
          * Updates the Issue table with the issues. This can either add issues to existing ones or perform a
          * force update and add from scratch
          *
-         * @param issuesList  the list of issues to be added
-         * @param forceUpdate if true will clear the table and add the issues, if false will add the issues to
-         *                    the existing issues in the table
+         * @param issuesList the list of issues to be added
          */
-        void updateIssueList(@NotNull List<Task> issuesList, boolean forceUpdate);
+        void updateIssueList(@NotNull List<Task> issuesList);
 
         /**
          * Initializes the ToolWindow components and their actions
@@ -92,6 +101,19 @@ public interface IListIssuesContract {
      * Interface to describe all actions that can be invoked from ToolWindow
      */
     interface IPresenter {
+
+        /**
+         * Show all issues in the issues table
+         */
+        void showAllIssues();
+
+        /**
+         * Search for issues with a query string
+         *
+         * @param query   the text to search
+         * @param project the project
+         */
+        void searchForIssues(@NotNull String query, @NotNull Project project);
 
         /**
          * Pull issues asynchronously from the server
@@ -165,5 +187,31 @@ public interface IListIssuesContract {
          * @return true if shown, false otherwise
          */
         boolean isDetailsPanelShown();
+    }
+
+    /**
+     * Data source for the issues
+     */
+    interface IDataSource {
+        /**
+         * Reloads the issues freshly
+         *
+         * @param issues the list of issues
+         */
+        void refreshIssues(List<Task> issues);
+
+        /**
+         * Adds new issues and updates existing issues
+         *
+         * @param issues the list of issues
+         */
+        void updateIssues(List<Task> issues);
+
+        /**
+         * Return the list of all issues
+         *
+         * @return list of issues
+         */
+        List<Task> getAllIssues();
     }
 }

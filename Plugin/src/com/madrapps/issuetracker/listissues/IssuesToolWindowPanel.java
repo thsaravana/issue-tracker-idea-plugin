@@ -32,7 +32,6 @@ import org.jetbrains.annotations.Nullable;
 import java.awt.CardLayout;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
@@ -71,8 +70,6 @@ public class IssuesToolWindowPanel extends SimpleToolWindowPanel implements ILis
     private JPanel mDetailsPanel;
     /** The search field */
     private SearchTextFieldWithStoredHistory mSearchField;
-    /** The list that's backing up the {@code mIssuesTable} */
-    private List<Task> mIssueList;
     /** The presenter */
     private ListIssuesPresenter mPresenter;
 
@@ -89,19 +86,18 @@ public class IssuesToolWindowPanel extends SimpleToolWindowPanel implements ILis
     }
 
     @Override
-    public void updateIssueList(@NotNull List<Task> issuesList, boolean forceUpdate) {
-        if (forceUpdate) {
-            mIssueList.clear();
-        }
-        issuesList.forEach(task -> {
-            final int index = mIssueList.indexOf(task);
-            if (index != -1) {
-                mIssueList.set(index, task);
-            } else {
-                mIssueList.add(task);
-            }
-        });
-        final ListTableModel<Task> model = new ListTableModel<>(COLUMN_NAMES, mIssueList, 0);
+    public void clearSearchField() {
+        mSearchField.reset();
+    }
+
+    @Override
+    public void saveSearchToHistory() {
+        mSearchField.addCurrentTextToHistory();
+    }
+
+    @Override
+    public void updateIssueList(@NotNull List<Task> issuesList) {
+        final ListTableModel<Task> model = new ListTableModel<>(COLUMN_NAMES, issuesList, 0);
         mIssuesTable.setModelAndUpdateColumns(model);
         final CardLayout layout = (CardLayout) mIssuesListPanel.getLayout();
         layout.show(mIssuesListPanel, "CardTABLE");
@@ -194,7 +190,13 @@ public class IssuesToolWindowPanel extends SimpleToolWindowPanel implements ILis
      * Do not rename.
      */
     public void createUIComponents() {
-        mSearchField = new SearchTextFieldWithStoredHistory("IssueTracker.SearchField");
+        mSearchField = new SearchTextFieldWithStoredHistory("IssueTracker.SearchField") {
+            @Override
+            protected void onFieldCleared() {
+                super.onFieldCleared();
+                mPresenter.showAllIssues();
+            }
+        };
         mSearchField.getTextEditor().setColumns(15);
         mSearchField.setHistorySize(5);
     }
@@ -205,18 +207,13 @@ public class IssuesToolWindowPanel extends SimpleToolWindowPanel implements ILis
             public void keyPressed(final KeyEvent e) {
                 if (e.getKeyCode() == KeyEvent.VK_ENTER) {
                     e.consume();
-                    mSearchField.addCurrentTextToHistory();
-                    search(mSearchField.getText(), project);
+                    mPresenter.searchForIssues(mSearchField.getText(), project);
                 } else if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
-                    mSearchField.reset();
+                    e.consume();
+                    mPresenter.showAllIssues();
                 }
             }
         });
-    }
-
-    // TODO much be updated
-    private void search(@NotNull String text, @NotNull Project project) {
-        mPresenter.pullIssues(project, text, true);
     }
 
     /**
@@ -249,8 +246,6 @@ public class IssuesToolWindowPanel extends SimpleToolWindowPanel implements ILis
     private void initializeComponents() {
         mPresenter = ListIssuesPresenter.getInstance();
         mPresenter.setView(this);
-
-        mIssueList = new ArrayList<>();
 
         mIssuesTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         mIssuesTable.setRowSelectionAllowed(true);
